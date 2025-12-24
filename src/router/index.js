@@ -17,7 +17,14 @@ const router = createRouter({
     routes,
 })
 
+// Loading state management
+import { useLoading } from '../composables/useLoading'
+const { setLoading } = useLoading()
+
 router.beforeEach((to, from, next) => {
+    // Start loading
+    setLoading(true)
+
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
     const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
     const currentUser = auth.currentUser
@@ -29,6 +36,13 @@ router.beforeEach((to, from, next) => {
     } else {
         next()
     }
+})
+
+router.afterEach(() => {
+    // End loading with a small delay for smooth UX
+    setTimeout(() => {
+        setLoading(false)
+    }, 300)
 })
 
 export default router
