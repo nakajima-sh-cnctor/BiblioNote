@@ -1,12 +1,13 @@
 <script setup>
 import { ref } from 'vue'
+import useAuth from '../composables/useAuth'
 
 const email = ref('')
 const password = ref('')
+const { login, error, isLoading } = useAuth()
 
-const handleLogin = () => {
-  // Logic will be implemented later
-  console.log('Login attempt:', email.value)
+const handleLogin = async () => {
+  await login(email.value, password.value)
 }
 </script>
 
@@ -55,12 +56,17 @@ const handleLogin = () => {
           </div>
         </div>
 
+        <div v-if="error" class="text-red-500 text-sm text-center">
+          {{ error }}
+        </div>
+
         <div>
           <button
             type="submit"
-            class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+            :disabled="isLoading"
+            class="flex w-full justify-center rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ログイン
+            {{ isLoading ? 'ログイン中...' : 'ログイン' }}
           </button>
         </div>
       </form>
