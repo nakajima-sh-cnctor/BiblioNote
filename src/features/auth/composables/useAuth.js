@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../firebase';
+import { auth } from '../../../firebase';
 
 const error = ref(null);
 const isLoading = ref(false);
