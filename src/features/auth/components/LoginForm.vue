@@ -1,13 +1,20 @@
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import useAuth from '../composables/useAuth'
 
 const email = ref('')
 const password = ref('')
 const { login, error, isLoading } = useAuth()
+const router = useRouter()
 
 const handleLogin = async () => {
-  await login(email.value, password.value)
+  try {
+    await login(email.value, password.value)
+    router.push('/')
+  } catch (e) {
+    // Error is already handled in useAuth
+  }
 }
 </script>
 
