@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { auth } from '../../../firebase';
 
 const error = ref(null);
@@ -39,8 +39,23 @@ const signup = async (email, password) => {
     }
 };
 
+const resetPassword = async (email) => {
+    error.value = null;
+    isLoading.value = true;
+
+    try {
+        await sendPasswordResetEmail(auth, email);
+        isLoading.value = false;
+    } catch (err) {
+        console.error(err);
+        error.value = err.message;
+        isLoading.value = false;
+        throw err;
+    }
+};
+
 const useAuth = () => {
-    return { error, isLoading, login, signup };
+    return { error, isLoading, login, signup, resetPassword };
 };
 
 export default useAuth;

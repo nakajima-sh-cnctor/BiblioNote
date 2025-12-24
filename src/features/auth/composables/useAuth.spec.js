@@ -1,11 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import useAuth from './useAuth';
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 
 // 認証関数のモック
 vi.mock('firebase/auth', () => ({
     signInWithEmailAndPassword: vi.fn(),
     createUserWithEmailAndPassword: vi.fn(),
+    sendPasswordResetEmail: vi.fn(),
     getAuth: vi.fn(), // useAuthが 'auth' を直接インポートしている場合でも、必要に応じてモック化します。
     // useAuthは '../../../firebase' から { auth } をインポートしているので、そのモジュールがauthインスタンスをエクスポートしていると仮定します。
     // useAuthのユニットテストでは、主にメソッドが呼び出されることを確認します。
@@ -73,6 +74,30 @@ describe('useAuth', () => {
 
             expect(isLoading.value).toBe(false);
             expect(error.value).toBe('Email already in use');
+        });
+
+        describe('resetPassword (パスワードリセット)', () => {
+            it('パスワードリセットメールを送信できること', async () => {
+                const { resetPassword } = useAuth();
+                sendPasswordResetEmail.mockResolvedValue();
+
+                await resetPassword('reset@example.com');
+
+                expect(isLoading.value).toBe(false);
+                expect(error.value).toBe(null);
+                expect(sendPasswordResetEmail).toHaveBeenCalledWith(expect.anything(), 'reset@example.com');
+            });
+
+            it('パスワードリセットエラーを処理できること', async () => {
+                const { resetPassword } = useAuth(); // Re-destructure specifically for this test context if needed, though closure captures it.
+                const mockError = new Error('User not found');
+                sendPasswordResetEmail.mockRejectedValue(mockError);
+
+                await expect(resetPassword('reset@example.com')).rejects.toThrow('User not found');
+
+                expect(isLoading.value).toBe(false);
+                expect(error.value).toBe('User not found');
+            });
         });
     });
 });
