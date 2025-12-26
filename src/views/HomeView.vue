@@ -22,7 +22,7 @@ const handleLogout = async () => {
         <h1 class="text-3xl font-bold">BiblioNote</h1>
         <div class="flex gap-4">
           <router-link
-            to="/profile"
+            to="/profile/view"
             class="rounded-md bg-gray-700 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gray-600"
           >
             プロフィール

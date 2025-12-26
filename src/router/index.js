@@ -4,6 +4,7 @@ import LoginView from '../features/auth/views/LoginView.vue'
 import SignupView from '../features/auth/views/SignupView.vue'
 import ForgotPasswordView from '../features/auth/views/ForgotPasswordView.vue'
 import ProfileView from '../features/profile/views/ProfileView.vue'
+import ProfileDetailView from '../features/profile/views/ProfileDetailView.vue'
 import HomeView from '../views/HomeView.vue'
 
 const routes = [
@@ -12,6 +13,7 @@ const routes = [
     { path: '/signup', component: SignupView, meta: { requiresGuest: true } },
     { path: '/forgot-password', component: ForgotPasswordView, meta: { requiresGuest: true } },
     { path: '/profile', component: ProfileView, meta: { requiresAuth: true } },
+    { path: '/profile/view', component: ProfileDetailView, meta: { requiresAuth: true, requiresProfile: true } },
 ]
 
 const router = createRouter({
