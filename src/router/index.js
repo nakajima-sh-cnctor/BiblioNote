@@ -3,13 +3,15 @@ import { auth } from '../firebase'
 import LoginView from '../features/auth/views/LoginView.vue'
 import SignupView from '../features/auth/views/SignupView.vue'
 import ForgotPasswordView from '../features/auth/views/ForgotPasswordView.vue'
+import ProfileView from '../features/profile/views/ProfileView.vue'
 import HomeView from '../views/HomeView.vue'
 
 const routes = [
-    { path: '/', component: HomeView, meta: { requiresAuth: true } },
+    { path: '/', component: HomeView, meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/login', component: LoginView, meta: { requiresGuest: true } },
     { path: '/signup', component: SignupView, meta: { requiresGuest: true } },
     { path: '/forgot-password', component: ForgotPasswordView, meta: { requiresGuest: true } },
+    { path: '/profile', component: ProfileView, meta: { requiresAuth: true } },
 ]
 
 const router = createRouter({
@@ -21,18 +23,38 @@ const router = createRouter({
 import { useLoading } from '../composables/useLoading'
 const { setLoading } = useLoading()
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
     // Start loading
     setLoading(true)
 
     const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
     const requiresGuest = to.matched.some(record => record.meta.requiresGuest)
+    const requiresProfile = to.matched.some(record => record.meta.requiresProfile)
     const currentUser = auth.currentUser
 
     if (requiresAuth && !currentUser) {
         next('/login')
     } else if (requiresGuest && currentUser) {
         next('/')
+    } else if (requiresProfile && currentUser) {
+        // Firebaseでプロフィールの存在確認
+        try {
+            const { CheckProfileExists } = await import('../features/profile/application/usecases/CheckProfileExists')
+            const { FirebaseProfileRepository } = await import('../features/profile/infrastructure/repositories/FirebaseProfileRepository')
+
+            const repository = new FirebaseProfileRepository()
+            const checkProfileExists = new CheckProfileExists(repository)
+            const profileExists = await checkProfileExists.execute(currentUser.uid)
+
+            if (!profileExists && to.path !== '/profile') {
+                next('/profile')
+            } else {
+                next()
+            }
+        } catch (error) {
+            console.error('Error checking profile:', error)
+            next()
+        }
     } else {
         next()
     }
