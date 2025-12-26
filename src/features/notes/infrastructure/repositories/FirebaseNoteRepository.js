@@ -72,8 +72,7 @@ export class FirebaseNoteRepository extends NoteRepository {
         try {
             const q = query(
                 collection(db, this.collectionName),
-                where('userId', '==', userId),
-                orderBy('updatedAt', 'desc')
+                where('userId', '==', userId)
             );
 
             const querySnapshot = await getDocs(q);
@@ -82,6 +81,9 @@ export class FirebaseNoteRepository extends NoteRepository {
             querySnapshot.forEach((doc) => {
                 notes.push(Note.fromFirestore(doc.id, doc.data()));
             });
+
+            // Client-side sort to avoid composite index requirement
+            notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
 
             return notes;
         } catch (error) {

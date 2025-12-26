@@ -1,12 +1,13 @@
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { marked } from 'marked';
 import { auth } from '../../../firebase';
 import { CreateNote } from '../application/usecases/CreateNote';
 import { FirebaseNoteRepository } from '../infrastructure/repositories/FirebaseNoteRepository';
-import { useRouter } from 'vue-router';
+import { useRouter, useRoute } from 'vue-router';
 
 const router = useRouter();
+const route = useRoute();
 const title = ref('');
 const content = ref('# マークダウンへようこそ\n\n書き始めてください...');
 const showHelp = ref(false);
@@ -29,6 +30,33 @@ const showNotification = (message, type = 'success') => {
   }, 3000);
 };
 
+onMounted(async () => {
+  const noteId = route.params.id;
+  if (noteId && noteId !== 'new') {
+    try {
+      const repository = new FirebaseNoteRepository();
+      const note = await repository.findById(noteId);
+      
+      if (note) {
+        // Check ownership
+        if (note.userId !== auth.currentUser?.uid) {
+           showNotification('このメモにアクセスする権限がありません', 'error');
+           router.push('/');
+           return;
+        }
+        title.value = note.title;
+        content.value = note.content;
+      } else {
+        showNotification('メモが見つかりませんでした', 'error');
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Error fetching note:', error);
+      showNotification('メモの取得に失敗しました', 'error');
+    }
+  }
+});
+
 const compiledMarkdown = computed(() => {
   return marked.parse(content.value, { breaks: true });
 });
@@ -50,13 +78,25 @@ const handleSave = async () => {
     const repository = new FirebaseNoteRepository();
     const createNote = new CreateNote(repository);
     
-    await createNote.execute({
+    // If editing existing note, pass the ID.
+    // If route.params.id is present and not 'new', use it.
+    // However, if we just created it and redirected without reload, the URL changes.
+    // Better to track 'currentNoteId' in ref or just rely on URL.
+    const currentId = route.params.id !== 'new' ? route.params.id : undefined;
+
+    const savedId = await createNote.execute({
+      id: currentId,
       userId: auth.currentUser.uid,
       title: title.value,
       content: content.value
     });
     
     showNotification('保存しました', 'success');
+    
+    // Redirect to edit page if created new
+    if (!currentId) {
+      router.push(`/notes/${savedId}`);
+    }
   } catch (error) {
     console.error('Save error:', error);
     showNotification('保存に失敗しました: ' + error.message, 'error');

@@ -14,6 +14,7 @@ const routes = [
     { path: '/forgot-password', component: ForgotPasswordView, meta: { requiresGuest: true } },
     { path: '/profile', component: ProfileView, meta: { requiresAuth: true } },
     { path: '/profile/view', component: ProfileDetailView, meta: { requiresAuth: true, requiresProfile: true } },
+    { path: '/notes/:id', component: () => import('../features/notes/views/NoteEditView.vue'), meta: { requiresAuth: true, requiresProfile: true } },
     { path: '/notes/new', component: () => import('../features/notes/views/NoteEditView.vue'), meta: { requiresAuth: true, requiresProfile: true } },
 ]
 
