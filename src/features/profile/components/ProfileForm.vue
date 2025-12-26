@@ -1,20 +1,29 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import useProfile from '../composables/useProfile'
 
 const router = useRouter()
-const { saveProfile, isLoading, error } = useProfile()
+const { profile, saveProfile, loadProfile, isLoading, error } = useProfile()
 
 const formData = ref({
   name: '',
   gender: ''
 })
 
+// 既存のプロフィールを読み込んで初期値として設定
+onMounted(async () => {
+  const existingProfile = await loadProfile()
+  if (existingProfile) {
+    formData.value.name = existingProfile.name
+    formData.value.gender = existingProfile.gender
+  }
+})
+
 const handleSubmit = async () => {
-  const success = saveProfile(formData.value)
+  const success = await saveProfile(formData.value)
   if (success) {
-    router.push('/')
+    router.push('/profile/view')
   }
 }
 
