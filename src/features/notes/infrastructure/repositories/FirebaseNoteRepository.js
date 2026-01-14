@@ -33,7 +33,8 @@ export class FirebaseNoteRepository extends NoteRepository {
             } else {
                 // Create new note
                 const collectionRef = collection(db, this.collectionName);
-                const docRef = await addDoc(collectionRef, note.toFirestore());
+                const data = note.toFirestore();
+                const docRef = await addDoc(collectionRef, data);
                 return docRef.id;
             }
         } catch (error) {

@@ -16,9 +16,10 @@ export class CreateNote {
      * @param {string} params.userId - ユーザーID
      * @param {string} params.title - タイトル
      * @param {string} params.content - 内容
+     * @param {string[]} [params.tags] - タグ (任意)
      * @returns {Promise<string>} - 保存されたノートのID
      */
-    async execute({ id, userId, title, content }) {
+    async execute({ id, userId, title, content, tags }) {
         // Create note entity
         // If id exists, it will be treated as an update by the repository logic
         // but typically use cases might be separated (Create vs Update).
@@ -30,7 +31,8 @@ export class CreateNote {
             id,
             userId,
             title,
-            content
+            content,
+            tags
         });
 
         note.validate();

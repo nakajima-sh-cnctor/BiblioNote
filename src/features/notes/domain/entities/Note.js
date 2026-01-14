@@ -3,11 +3,12 @@
  * ドメイン層のエンティティ - ビジネスルールとバリデーションを含む
  */
 export class Note {
-    constructor({ id, userId, title, content, createdAt, updatedAt }) {
+    constructor({ id, userId, title, content, tags, createdAt, updatedAt }) {
         this.id = id;
         this.userId = userId;
         this.title = title;
         this.content = content || '';
+        this.tags = tags || [];
         this.createdAt = createdAt || new Date().toISOString();
         this.updatedAt = updatedAt || new Date().toISOString();
     }
@@ -28,6 +29,10 @@ export class Note {
         if (this.title.length > 100) {
             throw new Error('タイトルは100文字以内で入力してください');
         }
+
+        if (!Array.isArray(this.tags)) {
+            throw new Error('タグは配列である必要があります');
+        }
     }
 
     /**
@@ -38,6 +43,7 @@ export class Note {
             userId: this.userId,
             title: this.title,
             content: this.content,
+            tags: this.tags,
             createdAt: this.createdAt,
             updatedAt: this.updatedAt
         };
@@ -52,6 +58,7 @@ export class Note {
             userId: data.userId,
             title: data.title,
             content: data.content,
+            tags: data.tags,
             createdAt: data.createdAt,
             updatedAt: data.updatedAt
         });

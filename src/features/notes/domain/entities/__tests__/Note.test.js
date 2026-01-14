@@ -15,6 +15,7 @@
  * - userId: ユーザーID (文字列, 必須)
  * - title: タイトル (文字列, 必須, 最大100文字)
  * - content: 本文 (文字列, 任意)
+ * - tags: タグ (配列, 任意)
  * - createdAt: 作成日時 (ISO文字列)
  * - updatedAt: 更新日時 (ISO文字列)
  * 
@@ -50,6 +51,7 @@ describe('Note Entity', () => {
                 userId: 'user123',
                 title: 'Test Note',
                 content: '# Content',
+                tags: ['tag1', 'tag2'],
                 createdAt: '2024-01-01T00:00:00.000Z',
                 updatedAt: '2024-01-01T00:00:00.000Z'
             };
@@ -60,6 +62,7 @@ describe('Note Entity', () => {
             expect(note.userId).toBe('user123');
             expect(note.title).toBe('Test Note');
             expect(note.content).toBe('# Content');
+            expect(note.tags).toEqual(['tag1', 'tag2']);
             expect(note.createdAt).toBe('2024-01-01T00:00:00.000Z');
             expect(note.updatedAt).toBe('2024-01-01T00:00:00.000Z');
         });
@@ -71,6 +74,7 @@ describe('Note Entity', () => {
          * 1. content が未指定の場合、空文字になること
          * 2. createdAt が未指定の場合、値が設定されること (現在時刻)
          * 3. updatedAt が未指定の場合、値が設定されること (現在時刻)
+         * 4. tags が未指定の場合、空配列になること
          * 
          * ## 期待される動作
          * - 入力: 必須項目のみのオブジェクト
@@ -85,6 +89,7 @@ describe('Note Entity', () => {
             const note = new Note(noteData);
 
             expect(note.content).toBe('');
+            expect(note.tags).toEqual([]);
             expect(note.createdAt).toBeDefined();
             expect(note.updatedAt).toBeDefined();
         });
@@ -159,6 +164,22 @@ describe('Note Entity', () => {
 
             expect(() => note.validate()).toThrow('タイトルは100文字以内で入力してください');
         });
+
+        /**
+         * @test タグ配列チェック
+         * 
+         * ## 検証項目
+         * 1. tags が配列でない場合、特定のエラーメッセージをスローすること
+         */
+        it('should throw error if tags is not an array', () => {
+            const note = new Note({
+                userId: 'user123',
+                title: 'Test Note',
+                tags: 'not-an-array'
+            });
+
+            expect(() => note.validate()).toThrow('タグは配列である必要があります');
+        });
     });
 
     /**
@@ -192,6 +213,7 @@ describe('Note Entity', () => {
                 userId: 'user123',
                 title: 'Test Note',
                 content: 'Content',
+                tags: [],
                 createdAt: '2024-01-01T00:00:00.000Z',
                 updatedAt: '2024-01-02T00:00:00.000Z'
             });
@@ -211,6 +233,7 @@ describe('Note Entity', () => {
                 userId: 'user123',
                 title: 'Test Note',
                 content: 'Content',
+                tags: ['tag1'],
                 createdAt: '2024-01-01T00:00:00.000Z',
                 updatedAt: '2024-01-02T00:00:00.000Z'
             };
@@ -221,6 +244,7 @@ describe('Note Entity', () => {
             expect(note.userId).toBe('user123');
             expect(note.title).toBe('Test Note');
             expect(note.content).toBe('Content');
+            expect(note.tags).toEqual(['tag1']);
             expect(note.createdAt).toBe('2024-01-01T00:00:00.000Z');
             expect(note.updatedAt).toBe('2024-01-02T00:00:00.000Z');
         });

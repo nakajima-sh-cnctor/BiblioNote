@@ -10,6 +10,8 @@ const router = useRouter();
 const route = useRoute();
 const title = ref('');
 const content = ref('# マークダウンへようこそ\n\n書き始めてください...');
+const tags = ref([]);
+const newTag = ref('');
 const showHelp = ref(false);
 const isSaving = ref(false);
 const notification = ref({
@@ -46,6 +48,7 @@ onMounted(async () => {
         }
         title.value = note.title;
         content.value = note.content;
+        tags.value = note.tags || [];
       } else {
         showNotification('メモが見つかりませんでした', 'error');
         router.push('/');
@@ -60,6 +63,18 @@ onMounted(async () => {
 const compiledMarkdown = computed(() => {
   return marked.parse(content.value, { breaks: true });
 });
+
+const addTag = () => {
+  const tag = newTag.value.trim();
+  if (tag && !tags.value.includes(tag)) {
+    tags.value.push(tag);
+  }
+  newTag.value = '';
+};
+
+const removeTag = (index) => {
+  tags.value.splice(index, 1);
+};
 
 const handleSave = async () => {
   if (!auth.currentUser) {
@@ -84,12 +99,14 @@ const handleSave = async () => {
     // Better to track 'currentNoteId' in ref or just rely on URL.
     const currentId = route.params.id !== 'new' ? route.params.id : undefined;
 
-    const savedId = await createNote.execute({
+    const params = {
       id: currentId,
       userId: auth.currentUser.uid,
       title: title.value,
-      content: content.value
-    });
+      content: content.value,
+      tags: [...tags.value] // Unwrap proxy
+    };
+    const savedId = await createNote.execute(params);
     
     showNotification('保存しました', 'success');
     
@@ -123,6 +140,32 @@ const handleSave = async () => {
           class="text-xl font-semibold text-white placeholder-gray-500 border-none focus:ring-0 w-full bg-transparent"
         />
       </div>
+      
+      <!-- Tag Input -->
+      <div class="flex items-center mx-4 bg-gray-700 rounded-full px-3 py-1.5 border border-gray-600 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500 transition-all">
+        <svg class="w-4 h-4 text-gray-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+        </svg>
+        <div class="flex flex-wrap gap-2 items-center">
+            <span 
+              v-for="(tag, index) in tags" 
+              :key="index" 
+              class="px-2 py-0.5 bg-indigo-500 text-white text-xs rounded-full flex items-center shadow-sm"
+            >
+              {{ tag }}
+              <button @click="removeTag(index)" class="ml-1 hover:text-indigo-200 focus:outline-none">×</button>
+            </span>
+            <input 
+              v-model="newTag" 
+              @keydown.enter="addTag"
+              @keydown.tab.prevent="addTag"
+              type="text" 
+              placeholder="タグ追加 (Enter)" 
+              class="w-24 bg-transparent text-sm text-gray-200 focus:text-white focus:outline-none placeholder-gray-500"
+            />
+        </div>
+      </div>
+
       <div class="flex items-center">
         <button 
           @click="showHelp = true"

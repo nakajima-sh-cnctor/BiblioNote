@@ -75,6 +75,11 @@ const handleLogout = async () => {
           >
             <h3 class="text-lg font-bold text-white mb-2 truncate">{{ note.title }}</h3>
             <p class="text-gray-400 text-sm mb-4 line-clamp-3 h-12">{{ note.content }}</p>
+            <div class="flex flex-wrap gap-2 mb-2">
+              <span v-for="tag in note.tags" :key="tag" class="px-2 py-0.5 bg-gray-700 text-indigo-300 text-xs rounded-full">
+                {{ tag }}
+              </span>
+            </div>
             <div class="text-xs text-gray-500 text-right">
               {{ new Date(note.updatedAt).toLocaleDateString() }}
             </div>

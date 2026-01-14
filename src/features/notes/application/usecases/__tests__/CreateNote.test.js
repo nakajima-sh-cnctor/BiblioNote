@@ -46,14 +46,15 @@ describe('CreateNote Use Case', () => {
      * 2. 新規作成されたノートのIDが返却されること
      * 
      * ## 期待される動作
-     * - 入力: ユーザーID、タイトル、本文
+     * - 入力: ユーザーID、タイトル、本文、タグ
      * - 出力: 新しく生成されたノートID ('new_note_id')
      */
     it('should create and save a new note', async () => {
         const params = {
             userId: 'user123',
             title: 'Test Note',
-            content: 'Content'
+            content: 'Content',
+            tags: ['tag1']
         };
 
         const noteId = await createNote.execute(params);
